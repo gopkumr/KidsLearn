@@ -4,17 +4,75 @@
     <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
         <MudButton Size="Size.Small" EndIcon="@Icons.Material.Filled.PlayArrow" OnClick="@Speak">Speak</MudButton>
         <MudButton Size="Size.Small" EndIcon="@Icons.Material.Filled.Pause" OnClick="@Pause">Pause</MudButton>
-        <MudButton Size="Size.Small" EndIcon="@Icons.Material.Filled.Stop" OnClick="@Stop">Stop</MudButton>
+        <MudMenu Size="Size.Medium" Label="Speed" Variant="Variant.Outlined" EndIcon="@Icons.Filled.KeyboardArrowDown" IconColor="Color.Secondary">
+            <ActivatorContent>
+                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.Speed">Speed</MudButton>
+            </ActivatorContent>
+            <ChildContent>
+                <MudMenuItem @onclick="()=>SelectSpeed(0.5)">
+                    @if (speed == 0.5)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    } 0.5
+                </MudMenuItem>
+                <MudMenuItem @onclick="()=>SelectSpeed(0.7)">
+                    @if (speed == 0.7)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    }
+                    0.7
+                </MudMenuItem>
+                <MudMenuItem @onclick="()=>SelectSpeed(0.9)">
+                    @if (speed == 0.9)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    }
+                    0.9
+                </MudMenuItem>
+                <MudMenuItem @onclick="()=>SelectSpeed(1.1)">
+                    @if (speed == 1.1)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    }
+                    1.1
+                </MudMenuItem>
+                <MudMenuItem @onclick="()=>SelectSpeed(1.3)">
+                    @if (speed == 1.3)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    }
+                    1.3
+                </MudMenuItem>
+                <MudMenuItem @onclick="()=>SelectSpeed(1.5)">
+                    @if (speed == 1.5)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    }
+                    1.5
+                </MudMenuItem>
+                <MudMenuItem @onclick="()=>SelectSpeed(1.7)">
+                    @if (speed == 1.7)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    }
+                    1.7
+                </MudMenuItem>
+                <MudMenuItem @onclick="()=>SelectSpeed(2.0)">
+                    @if (speed == 2.0)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    }
+                    2.0
+                </MudMenuItem>
+            </ChildContent>
+        </MudMenu>
     </MudButtonGroup>
-
-    <MudSlider Min="0.5" Max="2" Step="0.1" @bind-Value="@speed">Speed: @speed.ToString()</MudSlider>
-
 </MudStack>
 
-  
+
 @code {
 
-    double speed = 1;
+    double speed = 1.1;
 
     [Parameter]
     public string TextToSpeak { get; set; } = string.Empty;
@@ -47,6 +105,11 @@
     {
         await JS.InvokeVoidAsync("pauseSpeaking");
 
+    }
+
+    private void SelectSpeed(double selectedSpeed)
+    {
+        speed = selectedSpeed;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
