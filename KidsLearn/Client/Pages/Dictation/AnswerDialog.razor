@@ -1,0 +1,73 @@
+﻿@using KidsLearn.Shared;
+@using Newtonsoft.Json;
+@using System.Text;
+
+@inject IJSRuntime JS
+
+<MudDialog DisableSidePadding="true">
+    <DialogContent>
+        <MudAlert Severity="Severity.Info">@MarkText</MudAlert>
+       <MudContainer Style="max-height: 500px; overflow-y: scroll">
+            <MudList Clickable="false">
+                @foreach (var word in DictationModel) {
+
+                    var icon = Icons.Material.Filled.Check;
+                    var text = $" Word {(word.Index + 1)}: {word.EnteredWord}";
+                    if (!word.IsCorrect) {
+                        icon = Icons.Material.Filled.Clear;
+                        text = $" Word {(word.Index + 1)}: Entered: {word.EnteredWord}, Correct: {word.Word}";
+                    }
+
+                    <MudListItem Icon="@icon">
+                        @text
+                    </MudListItem>
+                }
+            </MudList>
+        </MudContainer>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public List<DictationModel> DictationModel { get; set; } = new List<DictationModel>();
+
+    async Task Submit(){
+
+        await DownloadFileFromStream();
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private Stream GetResultStream()
+    {
+        var answerJson = JsonConvert.SerializeObject(DictationModel);
+        var binaryAnswers=Encoding.UTF8.GetBytes(answerJson);
+        var memStream = new MemoryStream(binaryAnswers);
+
+        return memStream;
+    }
+
+    private async Task DownloadFileFromStream()
+    {
+        var fileStream = GetResultStream();
+        var fileName = $"Dictionary-{DateTime.Now.ToString("yyy-MM-ddTHH:mm:ss")}.json";
+
+        using var streamRef = new DotNetStreamReference(stream: fileStream);
+
+        await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+    }
+
+    protected string MarkText => $"Your score for this dictation: {DictationModel.Count(q=>q.IsCorrect)}/{DictationModel.Count}";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Dictation/AnswerDialog.razor.js");
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+}

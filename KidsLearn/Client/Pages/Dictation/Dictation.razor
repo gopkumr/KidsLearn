@@ -1,0 +1,96 @@
+﻿@inject HttpClient Http;
+@inject IDialogService Dialog
+
+@using KidsLearn.Shared;
+
+@page "/dictation"
+
+
+<MudText Typo="Typo.h3" Class="ml-4">Dictation</MudText>
+<MudText Class="ml-4">@enteredValue</MudText>
+<MudPaper Width="800px" Class="ml-6 mt-8">
+    <MudCarousel @bind-SelectedIndex="@selectedIndex" tr Class="mud-width-full" Style="height:450px;" ItemsSource="@dictationModel" ShowArrows="false" ShowBullets="false" EnableSwipeGesture="true" AutoCycle="false">
+        <ItemTemplate>
+            <MudCard Outlined="true" Height="350px" Width="650px" Class="ml-15 mb-15 mt-15">
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        <MudAvatar Color="Color.Secondary">@(context.Index+1)</MudAvatar>
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.body1">Word @(context.Index+1)/@dictationModel.Count</MudText>
+                        <MudText Typo="Typo.body2">Hear the word and type the spelling</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudIconButton Icon="@Icons.Material.Filled.Settings" Color="Color.Default" />
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <AudioPlayer TextToSpeak="@context.Word" SpeakOnLoad="true"></AudioPlayer>
+                    <MudTextField AutoFocus="true" @bind-Value="@context.EnteredWord" Label="Type in the word in this textbox" Class="mt-4" spellcheck="false" Variant="Variant.Filled" @onkeypress="OnAnswerKeyPress"></MudTextField>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudStack Justify="@Justify.SpaceBetween" Row="true" Style="width:100%" Class="mt-4">
+                        <MudButton Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.ArrowBack" @onclick="PrevWord" Color=" Color.Primary">Previous Word</MudButton>
+                        <MudButton Variant="Variant.Outlined" EndIcon="@Icons.Material.Filled.ArrowForward" @onclick="NextWord" Color=" Color.Primary">Next Word</MudButton>
+                    </MudStack>
+                   
+                </MudCardActions>
+            </MudCard>
+        </ItemTemplate>
+    </MudCarousel>
+    <MudButton Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary" Class="ml-15 mt-5 mb-5" Size="Size.Large" @onclick="ShowResult">Submit Answers</MudButton>
+</MudPaper>
+
+@code {
+
+        [Inject] private IDialogService DialogService { get; set; }
+
+    //private MudCarousel<DictationModel> _carousel;
+    private List<DictationModel> dictationModel = new List<DictationModel>();
+    private List<string> enteredWords = Enumerable.Empty<string>().ToList();
+    private int selectedIndex = 0;
+    private string enteredValue = string.Empty;
+    private string val = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var words = await Http.GetFromJsonAsync<IEnumerable<string>>("words.json");
+
+        if(words!=null && words.Any())
+        {
+            dictationModel = words.Select((q,i) => new DictationModel { Word = q, Index=i }).ToList();
+        }
+    }
+
+    protected void NextWord()
+    {
+        if (selectedIndex <dictationModel.Count-1)
+        {
+            selectedIndex++;
+        }
+    }
+
+    protected void PrevWord()
+    {
+        if (selectedIndex > 0)
+        {
+            selectedIndex--;
+        }
+    }
+
+    protected void ShowResult()
+    {
+        DialogOptions options = new DialogOptions() { DisableBackdropClick = true };
+
+        var parameters = new DialogParameters();
+        parameters.Add("DictationModel", dictationModel);
+        Dialog.Show<AnswerDialog>("Dictations Answers", parameters, options);
+    }
+
+    protected void  OnAnswerKeyPress(KeyboardEventArgs e)
+    {
+        if(e.Key.Equals("enter", StringComparison.InvariantCultureIgnoreCase)){
+            NextWord();
+        }
+    }
+}

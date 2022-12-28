@@ -1,0 +1,60 @@
+﻿@inject IJSRuntime JS
+
+<MudStack Row="true">
+    <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
+        <MudButton Size="Size.Small" EndIcon="@Icons.Material.Filled.PlayArrow" OnClick="@Speak">Speak</MudButton>
+        <MudButton Size="Size.Small" EndIcon="@Icons.Material.Filled.Pause" OnClick="@Pause">Pause</MudButton>
+        <MudButton Size="Size.Small" EndIcon="@Icons.Material.Filled.Stop" OnClick="@Stop">Stop</MudButton>
+    </MudButtonGroup>
+
+    <MudSlider Min="0.5" Max="2" Step="0.1" @bind-Value="@speed">Speed: @speed.ToString()</MudSlider>
+
+</MudStack>
+
+  
+@code {
+
+    double speed = 1;
+
+    [Parameter]
+    public string TextToSpeak { get; set; } = string.Empty;
+
+    [Parameter]
+    public bool SpeakOnLoad { get; set; } = false;
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+        if (SpeakOnLoad && firstRender)
+        {
+            Speak();
+        }
+    }
+
+    private async Task Speak()
+    {
+        await JS.InvokeVoidAsync("speakText", TextToSpeak, speed);
+
+    }
+
+    private async Task Stop()
+    {
+        await JS.InvokeVoidAsync("stopSpeaking");
+
+    }
+
+    private async Task Pause()
+    {
+        await JS.InvokeVoidAsync("pauseSpeaking");
+
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Dictation/AudioPlayer.razor.js");
+
+        await base.OnAfterRenderAsync(firstRender);
+
+    }
+
+}
