@@ -1,10 +1,24 @@
 ﻿@page "/"
 
 
-<PageTitle>Index</PageTitle>
-
-<h1>Hello, world!</h1>
-
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
+<MudGrid Class="mt-8 ml-5">
+    <MudItem xs="12" sm="6" md="4">
+        <MudCard Elevation="25" Class="rounded-lg pb-4">
+            <MudCardHeader>
+                <CardHeaderContent>
+                    <MudText Typo="Typo.h5" Align="Align.Center">Dictation</MudText>
+                </CardHeaderContent>
+            </MudCardHeader>
+            <MudCardContent>
+                <MudList Class="mx-auto mt-4" Style="width:500px;">
+                    <MudListItem Icon="@Icons.Material.Filled.QuestionMark">
+                       Hear the word and type the correct spelling in the textbox. 
+                    </MudListItem>
+                </MudList>
+            </MudCardContent>
+            <MudCardActions Class="d-flex justify-center">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large" Style="width:50%;" Link="/dictation">Start Now</MudButton>
+            </MudCardActions>
+        </MudCard>
+    </MudItem>
+</MudGrid>
