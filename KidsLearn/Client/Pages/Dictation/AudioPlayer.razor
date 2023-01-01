@@ -1,9 +1,24 @@
-﻿@inject IJSRuntime JS
+﻿@using KidsLearn.Shared;
+@using System.Net.Http.Headers;
+@inject HttpClient Http;
+@inject IJSRuntime JS
 
 <MudStack Row="true">
     <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
         <MudButton Size="Size.Small" EndIcon="@Icons.Material.Filled.PlayArrow" OnClick="@Speak">Speak</MudButton>
-        <MudButton Size="Size.Small" EndIcon="@Icons.Material.Filled.Pause" OnClick="@Pause">Pause</MudButton>
+        <MudMenu Size="Size.Medium" Label="Help" Variant="Variant.Outlined" EndIcon="@Icons.Filled.Help" IconColor="Color.Secondary">
+            <ActivatorContent>
+                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.Help">Help</MudButton>
+            </ActivatorContent>
+            <ChildContent>
+                <MudMenuItem @onclick="()=>MoreOptions(defString)">
+                    Meaning of the word
+                </MudMenuItem>
+                <MudMenuItem @onclick="()=>MoreOptions(exampleString)">
+                    Use the word in a sentence
+                </MudMenuItem>
+            </ChildContent>
+        </MudMenu>
         <MudMenu Size="Size.Medium" Label="Speed" Variant="Variant.Outlined" EndIcon="@Icons.Filled.KeyboardArrowDown" IconColor="Color.Secondary">
             <ActivatorContent>
                 <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.Speed">Speed</MudButton>
@@ -80,6 +95,11 @@
     [Parameter]
     public bool SpeakOnLoad { get; set; } = false;
 
+    private List<DictionaryResponse> dictionaryResponse = null;
+
+    private string exampleString = "example";
+    private string defString = "definition";
+
     protected override void OnAfterRender(bool firstRender)
     {
         base.OnAfterRender(firstRender);
@@ -112,12 +132,56 @@
         speed = selectedSpeed;
     }
 
+    private async Task MoreOptions(string option)
+    {
+        if (dictionaryResponse == null)
+        {
+            try
+            {
+                var uri = $"https://api.dictionaryapi.dev/api/v2/entries/en/{TextToSpeak}";
+                var request = new HttpRequestMessage(HttpMethod.Get, uri);
+
+                var response = await Http.SendAsync(request);
+                var value = await response.Content.ReadAsStringAsync();
+                dictionaryResponse = await response.Content.ReadFromJsonAsync<List<DictionaryResponse>>();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        if (dictionaryResponse != null)
+            switch (option)
+            {
+                case "definition":
+                    await JS.InvokeVoidAsync("speakText", $"{dictionaryResponse.First().meanings.First().partOfSpeech}: {dictionaryResponse.First().meanings.First().definitions.First().definition}", speed);
+                    break;
+                case "example":
+                    var meaning = dictionaryResponse.First().meanings.Where(q => q.definitions.Any(r => !string.IsNullOrEmpty(r.example))).FirstOrDefault();
+                    var example = "Sorry, no example available for this word";
+                    if (meaning != null)
+                    {
+                        var definition = meaning.definitions.First(q => !string.IsNullOrEmpty(q.example));
+                        example = $"{meaning.partOfSpeech}, {definition.example}";
+                    }
+
+                    await JS.InvokeVoidAsync("speakText", example, speed);
+                    break;
+                default:
+                    await JS.InvokeVoidAsync("speakText", "No example available", speed);
+                    break;
+            };
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Dictation/AudioPlayer.razor.js");
 
         await base.OnAfterRenderAsync(firstRender);
 
+        if (firstRender)
+            dictionaryResponse = null;
     }
 
 }
