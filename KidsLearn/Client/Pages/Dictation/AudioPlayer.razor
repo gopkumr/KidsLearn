@@ -9,7 +9,7 @@
         <MudButton Size="Size.Small" EndIcon="@Icons.Material.Filled.PlayArrow" OnClick="@Speak">Speak</MudButton>
         <MudMenu Size="Size.Medium" Label="Help" Variant="Variant.Outlined" EndIcon="@Icons.Filled.Help" IconColor="Color.Secondary">
             <ActivatorContent>
-                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.Help">Help</MudButton>
+                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.Help">Help<MudChip Variant="Variant.Outlined" Size="Size.Small"></MudChip></MudButton>
             </ActivatorContent>
             <ChildContent>
                 <MudMenuItem @onclick="()=>MoreOptions(defString)">
@@ -22,7 +22,7 @@
         </MudMenu>
         <MudMenu Size="Size.Medium" Label="Speed" Variant="Variant.Outlined" EndIcon="@Icons.Filled.KeyboardArrowDown" IconColor="Color.Secondary">
             <ActivatorContent>
-                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.Speed">Speed</MudButton>
+                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.Speed">Speed<MudChip Variant="Variant.Outlined" Size="Size.Small">@speed</MudChip></MudButton>
             </ActivatorContent>
             <ChildContent>
                 <MudMenuItem @onclick="()=>SelectSpeed(0.5)">
@@ -84,7 +84,7 @@
         </MudMenu>
         <MudMenu Size="Size.Medium" Label="Pitch" Variant="Variant.Outlined" EndIcon="@Icons.Filled.KeyboardArrowDown" IconColor="Color.Secondary">
             <ActivatorContent>
-                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.KeyboardVoice">Pitch</MudButton>
+                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.KeyboardVoice">Pitch<MudChip Variant="Variant.Outlined" Size="Size.Small">@pitch</MudChip></MudButton>
             </ActivatorContent>
             <ChildContent>
                 <MudMenuItem @onclick="()=>SelectPitch(0)">
@@ -108,31 +108,53 @@
 
             </ChildContent>
         </MudMenu>
-        <MudMenu Size="Size.Medium" Label="Voice" Variant="Variant.Outlined" EndIcon="@Icons.Filled.KeyboardArrowDown" IconColor="Color.Secondary">
-            <ActivatorContent>
-                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.VoiceChat">Voice</MudButton>
-            </ActivatorContent>
-            <ChildContent>
-                @foreach(var lang in australianVoices){
-                <MudMenuItem @onclick="()=>SelectVoice(lang.Name)">
-                    @if (selectedVoice == lang.Name)
+        @if (australianVoices != null && australianVoices.Any())
+        {
+            <MudMenu Size="Size.Medium" Label="Voice" Variant="Variant.Outlined" EndIcon="@Icons.Filled.KeyboardArrowDown" IconColor="Color.Secondary">
+                <ActivatorContent>
+                    <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.VoiceChat">Voice<MudChip Variant="Variant.Outlined" Size="Size.Small"></MudChip></MudButton>
+                </ActivatorContent>
+                <ChildContent>
+                    @foreach (var lang in australianVoices)
                     {
-                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
-                    } @lang.Name
-                </MudMenuItem>
-                }
-            </ChildContent>
-        </MudMenu>
+                        <MudMenuItem @onclick="()=>SelectVoice(lang.Name)">
+                            @if (selectedVoice == lang.Name)
+                            {
+                                <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                            }
+                            @lang.Name
+                        </MudMenuItem>
+                    }
+                </ChildContent>
+            </MudMenu>
+        }
+        else
+        {
+            <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.Refresh" @onclick="GetVoices">Release Voices</MudButton>
+        }
     </MudButtonGroup>
 </MudStack>
 
 
 @code {
 
-    double speed = 1.1;
-    int pitch = 1;
-    string selectedVoice = string.Empty;
-    List<Language> australianVoices;
+    [Parameter]
+    public double speed { get; set; } = 1.1;
+
+    [Parameter]
+    public EventCallback<double> speedChanged { get; set; }
+
+    [Parameter]
+    public int pitch { get; set; } = 1;
+
+    [Parameter]
+    public EventCallback<int> pitchChanged { get; set; }
+
+    [Parameter]
+    public string selectedVoice { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> selectedVoiceChanged { get; set; }
 
     [Parameter]
     public string TextToSpeak { get; set; } = string.Empty;
@@ -140,8 +162,8 @@
     [Parameter]
     public bool SpeakOnLoad { get; set; } = false;
 
+    private List<Language> australianVoices=null;
     private List<DictionaryResponse> dictionaryResponse = null;
-
     private string exampleString = "example";
     private string defString = "definition";
 
@@ -154,37 +176,40 @@
     private async Task Stop()
     {
         await JS.InvokeVoidAsync("stopSpeaking");
-
     }
 
     private async Task Pause()
     {
         await JS.InvokeVoidAsync("pauseSpeaking");
-
     }
 
     private void SelectSpeed(double selectedSpeed)
     {
         speed = selectedSpeed;
+        speedChanged.InvokeAsync(selectedSpeed);
     }
 
     private void SelectPitch(int selectedPitch)
     {
         pitch = selectedPitch;
+        pitchChanged.InvokeAsync(selectedPitch);
     }
-
 
     private void SelectVoice(string name)
     {
         selectedVoice = name;
+        selectedVoiceChanged.InvokeAsync(name);
     }
-
 
     private async Task GetVoices()
     {
         var voices = await JS.InvokeAsync<List<Language>>("getAllVoices");
-        australianVoices=voices.Where(q=>q.Lang.Equals("en-AU", StringComparison.InvariantCultureIgnoreCase)).ToList();
-        selectedVoice = australianVoices.First().Name;
+        if (voices != null && voices.Any())
+        {
+            australianVoices = voices.Where(q => q.Lang.Equals("en-AU", StringComparison.InvariantCultureIgnoreCase)).ToList();
+            if (string.IsNullOrEmpty(selectedVoice))
+                selectedVoice = australianVoices.First().Name;
+        }
     }
 
     private async Task MoreOptions(string option)
@@ -232,18 +257,17 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Dictation/AudioPlayer.razor.js");
+        await base.OnAfterRenderAsync(firstRender);
 
         if (firstRender)
         {
             dictionaryResponse = null;
             await GetVoices();
-
+            StateHasChanged();
             if (SpeakOnLoad)
             {
-                Speak();
+                await Speak();
             }
         }
-
-        await base.OnAfterRenderAsync(firstRender);
     }
 }

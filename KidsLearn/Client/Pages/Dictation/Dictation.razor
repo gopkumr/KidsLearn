@@ -27,7 +27,7 @@
                     </CardHeaderActions>
                 </MudCardHeader>
                 <MudCardContent>
-                    <AudioPlayer TextToSpeak="@context.Word" SpeakOnLoad="true"></AudioPlayer>
+                    <AudioPlayer TextToSpeak="@context.Word" SpeakOnLoad="true" @bind-speed="speed"  @bind-pitch="pitch" @bind-selectedVoice="selectedVoice"></AudioPlayer>
                     <MudTextField AutoFocus="true" @bind-Value="@context.EnteredWord" Label="Type in the word in this textbox" Class="mt-4" spellcheck="false" Variant="Variant.Filled" @onkeypress="OnAnswerKeyPress"></MudTextField>
                 </MudCardContent>
                 <MudCardActions>
@@ -51,6 +51,9 @@
     private int selectedIndex = 0;
     private string enteredValue = string.Empty;
     private string val = string.Empty;
+    private double speed = 1.1;
+    private int pitch = 1;
+    private string selectedVoice = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {

@@ -2,7 +2,6 @@
 
 if ('speechSynthesis' in window) {
     isSpeechSupported = true;
-    speechSynthesis.onvoiceschanged = () => populateVoiceList();
 }
 
 
@@ -16,10 +15,6 @@ window.getAllVoices = function () {
     }
 
     return null;
-}
-
-function populateVoiceList() {
-    speechSynthesis.getVoices(); // now should have an array of all voices
 }
 
 function getVoice(name) {
