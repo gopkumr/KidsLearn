@@ -1,5 +1,6 @@
 ﻿@using KidsLearn.Shared;
 @using System.Net.Http.Headers;
+@using Newtonsoft.Json.Linq;
 @inject HttpClient Http;
 @inject IJSRuntime JS
 
@@ -81,6 +82,47 @@
                 </MudMenuItem>
             </ChildContent>
         </MudMenu>
+        <MudMenu Size="Size.Medium" Label="Pitch" Variant="Variant.Outlined" EndIcon="@Icons.Filled.KeyboardArrowDown" IconColor="Color.Secondary">
+            <ActivatorContent>
+                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.KeyboardVoice">Pitch</MudButton>
+            </ActivatorContent>
+            <ChildContent>
+                <MudMenuItem @onclick="()=>SelectPitch(0)">
+                    @if (pitch == 0)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    } 0
+                </MudMenuItem>
+                <MudMenuItem @onclick="()=>SelectPitch(1)">
+                    @if (pitch == 1)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    } 1
+                </MudMenuItem>
+                <MudMenuItem @onclick="()=>SelectPitch(2)">
+                    @if (pitch == 2)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    } 2
+                </MudMenuItem>
+
+            </ChildContent>
+        </MudMenu>
+        <MudMenu Size="Size.Medium" Label="Voice" Variant="Variant.Outlined" EndIcon="@Icons.Filled.KeyboardArrowDown" IconColor="Color.Secondary">
+            <ActivatorContent>
+                <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.VoiceChat">Voice</MudButton>
+            </ActivatorContent>
+            <ChildContent>
+                @foreach(var lang in australianVoices){
+                <MudMenuItem @onclick="()=>SelectVoice(lang.Name)">
+                    @if (selectedVoice == lang.Name)
+                    {
+                        <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
+                    } @lang.Name
+                </MudMenuItem>
+                }
+            </ChildContent>
+        </MudMenu>
     </MudButtonGroup>
 </MudStack>
 
@@ -88,6 +130,9 @@
 @code {
 
     double speed = 1.1;
+    int pitch = 1;
+    string selectedVoice = string.Empty;
+    List<Language> australianVoices;
 
     [Parameter]
     public string TextToSpeak { get; set; } = string.Empty;
@@ -100,18 +145,9 @@
     private string exampleString = "example";
     private string defString = "definition";
 
-    protected override void OnAfterRender(bool firstRender)
-    {
-        base.OnAfterRender(firstRender);
-        if (SpeakOnLoad && firstRender)
-        {
-            Speak();
-        }
-    }
-
     private async Task Speak()
     {
-        await JS.InvokeVoidAsync("speakText", TextToSpeak, speed);
+        await JS.InvokeVoidAsync("speakText", TextToSpeak, speed, pitch, selectedVoice);
 
     }
 
@@ -130,6 +166,25 @@
     private void SelectSpeed(double selectedSpeed)
     {
         speed = selectedSpeed;
+    }
+
+    private void SelectPitch(int selectedPitch)
+    {
+        pitch = selectedPitch;
+    }
+
+
+    private void SelectVoice(string name)
+    {
+        selectedVoice = name;
+    }
+
+
+    private async Task GetVoices()
+    {
+        var voices = await JS.InvokeAsync<List<Language>>("getAllVoices");
+        australianVoices=voices.Where(q=>q.Lang.Equals("en-AU", StringComparison.InvariantCultureIgnoreCase)).ToList();
+        selectedVoice = australianVoices.First().Name;
     }
 
     private async Task MoreOptions(string option)
@@ -155,7 +210,7 @@
             switch (option)
             {
                 case "definition":
-                    await JS.InvokeVoidAsync("speakText", $"{dictionaryResponse.First().meanings.First().partOfSpeech}: {dictionaryResponse.First().meanings.First().definitions.First().definition}", speed);
+                    await JS.InvokeVoidAsync("speakText", $"{dictionaryResponse.First().meanings.First().partOfSpeech}: {dictionaryResponse.First().meanings.First().definitions.First().definition}", speed, pitch, selectedVoice);
                     break;
                 case "example":
                     var meaning = dictionaryResponse.First().meanings.Where(q => q.definitions.Any(r => !string.IsNullOrEmpty(r.example))).FirstOrDefault();
@@ -166,10 +221,10 @@
                         example = $"{meaning.partOfSpeech}, {definition.example}";
                     }
 
-                    await JS.InvokeVoidAsync("speakText", example, speed);
+                    await JS.InvokeVoidAsync("speakText", example, speed, pitch, selectedVoice);
                     break;
                 default:
-                    await JS.InvokeVoidAsync("speakText", "No example available", speed);
+                    await JS.InvokeVoidAsync("speakText", "No example available", speed, pitch, selectedVoice);
                     break;
             };
     }
@@ -181,7 +236,15 @@
         await base.OnAfterRenderAsync(firstRender);
 
         if (firstRender)
+        {
             dictionaryResponse = null;
+            await GetVoices();
+
+            if (SpeakOnLoad)
+            {
+                Speak();
+            }
+        }
     }
 
 }

@@ -6,26 +6,35 @@ if ('speechSynthesis' in window) {
     isSpeechSupported = false;
 }
 
-function getVoices(locale) {
+window.getAllVoices=function() {
 
     if (isSpeechSupported) {
-        let voices = speechSynthesis.getVoices();
-        const result = voices.filter(voice => voice.lang.toLowerCase() == locale.toLowerCase());
-        return result;
+        var voices = speechSynthesis.getVoices();
+        return voices.map(x => { return { "Lang": x.lang, "Name": x.name }; });
     }
 
     return null;
 }
 
-window.speakText = function (textToSpeak, rate) {
+function getVoice(name) {
+
+    if (isSpeechSupported) {
+        var voices = speechSynthesis.getVoices();
+        const result = voices.filter(voice => voice.name.toLowerCase() == name.toLowerCase());
+        return result;
+    }
+    return null;
+}
+
+window.speakText = function (textToSpeak, rate, pitch, langName) {
 
     let speakData = new SpeechSynthesisUtterance();
     speakData.volume = 1; // From 0 to 1
     speakData.rate = rate; // From 0.1 to 10
-    speakData.pitch = 0; // From 0 to 2
+    speakData.pitch = pitch; // From 0 to 2
     speakData.text = textToSpeak;
     speakData.lang = 'en';
-    speakData.voice = getVoices("en-AU")[0];
+    speakData.voice = getVoice(langName)[0];
 
     if (speechSynthesis.paused) {
         speechSynthesis.resume();

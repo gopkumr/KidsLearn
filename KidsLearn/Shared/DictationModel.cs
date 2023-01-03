@@ -8,4 +8,10 @@ namespace KidsLearn.Shared
 
         public bool IsCorrect => string.Equals(Word, EnteredWord, StringComparison.InvariantCultureIgnoreCase);
     }
+
+    public class Language
+    {
+        public string Lang { get; set; }
+        public string Name { get; set; }
+    }
 }
