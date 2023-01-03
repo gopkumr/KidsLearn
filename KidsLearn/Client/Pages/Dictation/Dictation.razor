@@ -1,5 +1,5 @@
 ﻿@inject HttpClient Http;
-@inject IDialogService Dialog
+@inject IDialogService Dialog;
 
 @using KidsLearn.Shared;
 
@@ -14,10 +14,10 @@
             <MudCard Outlined="false" Height="350px" Class="ml-10 mb-10 mt-10 mr-15">
                 <MudCardHeader>
                     <CardHeaderAvatar>
-                        <MudAvatar Color="Color.Secondary">@(context.Index+1)</MudAvatar>
-                    </CardHeaderAvatar>
-                    <CardHeaderContent>
-                        <MudText Typo="Typo.body1">Word @(context.Index+1)/@dictationModel.Count</MudText>
+                        <MudAvatar Color="Color.Secondary">@(context.Index + 1)</MudAvatar>
+                        </CardHeaderAvatar>
+                        <CardHeaderContent>
+                            <MudText Typo="Typo.body1">Word @(context.Index + 1)/@dictationModel.Count</MudText>
                         <MudText Typo="Typo.body2">Hear the word and type the spelling</MudText>
                     </CardHeaderContent>
                     <CardHeaderActions>
@@ -44,7 +44,7 @@
 
 @code {
 
-   [Inject] private IDialogService DialogService { get; set; }
+    [Inject] private IDialogService DialogService { get; set; }
 
     private List<DictationModel> dictationModel = new List<DictationModel>();
     private List<string> enteredWords = Enumerable.Empty<string>().ToList();
@@ -56,15 +56,16 @@
     {
         var words = await Http.GetFromJsonAsync<IEnumerable<string>>("words.json");
 
-        if(words!=null && words.Any())
+
+        if (words != null && words.Any())
         {
-            dictationModel = words.Select((q,i) => new DictationModel { Word = q, Index=i }).ToList();
+            dictationModel = words.Select((q, i) => new DictationModel { Word = q, Index = i }).ToList();
         }
     }
 
     protected void NextWord()
     {
-        if (selectedIndex <dictationModel.Count-1)
+        if (selectedIndex < dictationModel.Count - 1)
         {
             selectedIndex++;
         }
@@ -87,9 +88,10 @@
         Dialog.Show<AnswerDialog>("Dictations Answers", parameters, options);
     }
 
-    protected void  OnAnswerKeyPress(KeyboardEventArgs e)
+    protected void OnAnswerKeyPress(KeyboardEventArgs e)
     {
-        if(e.Key.Equals("enter", StringComparison.InvariantCultureIgnoreCase)){
+        if (e.Key.Equals("enter", StringComparison.InvariantCultureIgnoreCase))
+        {
             NextWord();
         }
     }

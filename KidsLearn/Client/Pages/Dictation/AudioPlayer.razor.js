@@ -2,18 +2,24 @@
 
 if ('speechSynthesis' in window) {
     isSpeechSupported = true;
-} else {
-    isSpeechSupported = false;
+    speechSynthesis.onvoiceschanged = () => populateVoiceList();
 }
 
-window.getAllVoices=function() {
+
+window.getAllVoices = function () {
 
     if (isSpeechSupported) {
         var voices = speechSynthesis.getVoices();
+        voices = speechSynthesis.getVoices();
+
         return voices.map(x => { return { "Lang": x.lang, "Name": x.name }; });
     }
 
     return null;
+}
+
+function populateVoiceList() {
+    speechSynthesis.getVoices(); // now should have an array of all voices
 }
 
 function getVoice(name) {

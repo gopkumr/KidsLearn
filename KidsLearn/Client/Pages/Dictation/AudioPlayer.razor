@@ -233,8 +233,6 @@
     {
         await JS.InvokeAsync<IJSObjectReference>("import", "./Pages/Dictation/AudioPlayer.razor.js");
 
-        await base.OnAfterRenderAsync(firstRender);
-
         if (firstRender)
         {
             dictionaryResponse = null;
@@ -245,6 +243,7 @@
                 Speak();
             }
         }
-    }
 
+        await base.OnAfterRenderAsync(firstRender);
+    }
 }
