@@ -209,7 +209,7 @@
             australianVoices = voices.Where(q => q.Lang.Equals("en-AU", StringComparison.InvariantCultureIgnoreCase)).ToList();
             if (!australianVoices.Any())
             {
-                australianVoices=voices.Where(q=>q.Lang.StartsWith("en", StringComparison.InvariantCultureIgnoreCase)).ToList();
+                australianVoices = voices.Where(q => q.Lang.StartsWith("en", StringComparison.InvariantCultureIgnoreCase)).ToList();
             }
             if (string.IsNullOrEmpty(selectedVoice))
                 selectedVoice = australianVoices.First().Name;
