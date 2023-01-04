@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KidsLearn.Shared
+namespace KidsLearn.Shared.models
 {
     public class Definition
     {
@@ -34,4 +34,4 @@ namespace KidsLearn.Shared
         public string origin { get; set; }
         public List<Meaning> meanings { get; set; }
     }
- }
+}

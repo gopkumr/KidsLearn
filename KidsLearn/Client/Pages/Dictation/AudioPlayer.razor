@@ -1,8 +1,10 @@
-﻿@using KidsLearn.Shared;
-@using System.Net.Http.Headers;
+﻿@using System.Net.Http.Headers;
+@using KidsLearn.Shared.services;
 @using Newtonsoft.Json.Linq;
+@using KidsLearn.Shared.models;
 @inject HttpClient Http;
-@inject IJSRuntime JS
+@inject ISpeechService speechService;
+@inject IJSRuntime JS;
 
 <MudStack Row="true">
     <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined">
@@ -169,18 +171,7 @@
 
     private async Task Speak()
     {
-        await JS.InvokeVoidAsync("speakText", TextToSpeak, speed, pitch, selectedVoice);
-
-    }
-
-    private async Task Stop()
-    {
-        await JS.InvokeVoidAsync("stopSpeaking");
-    }
-
-    private async Task Pause()
-    {
-        await JS.InvokeVoidAsync("pauseSpeaking");
+        await speechService.Speak(TextToSpeak, speed, pitch, selectedVoice);
     }
 
     private void SelectSpeed(double selectedSpeed)
@@ -203,7 +194,7 @@
 
     private async Task GetVoices()
     {
-        var voices = await JS.InvokeAsync<List<Language>>("getAllVoices");
+        var voices = await speechService.GetSupportedVoices();
         if (voices != null && voices.Any())
         {
             australianVoices = voices.Where(q => q.Lang.Equals("en-AU", StringComparison.InvariantCultureIgnoreCase)).ToList();
@@ -239,7 +230,7 @@
             switch (option)
             {
                 case "definition":
-                    await JS.InvokeVoidAsync("speakText", $"{dictionaryResponse.First().meanings.First().partOfSpeech}: {dictionaryResponse.First().meanings.First().definitions.First().definition}", speed, pitch, selectedVoice);
+                    await speechService.Speak($"{dictionaryResponse.First().meanings.First().partOfSpeech}: {dictionaryResponse.First().meanings.First().definitions.First().definition}", speed, pitch, selectedVoice);
                     break;
                 case "example":
                     var meaning = dictionaryResponse.First().meanings.Where(q => q.definitions.Any(r => !string.IsNullOrEmpty(r.example))).FirstOrDefault();
@@ -250,10 +241,10 @@
                         example = $"{meaning.partOfSpeech}, {definition.example}";
                     }
 
-                    await JS.InvokeVoidAsync("speakText", example, speed, pitch, selectedVoice);
+                    await speechService.Speak(example, speed, pitch, selectedVoice);
                     break;
                 default:
-                    await JS.InvokeVoidAsync("speakText", "No example available", speed, pitch, selectedVoice);
+                    await speechService.Speak("No example available", speed, pitch, selectedVoice);
                     break;
             };
     }

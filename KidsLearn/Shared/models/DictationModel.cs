@@ -1,4 +1,4 @@
-namespace KidsLearn.Shared
+namespace KidsLearn.Shared.models
 {
     public class DictationModel
     {
