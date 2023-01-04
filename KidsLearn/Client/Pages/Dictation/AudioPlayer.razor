@@ -4,6 +4,7 @@
 @using KidsLearn.Shared.models;
 @inject HttpClient Http;
 @inject ISpeechService speechService;
+@inject IDictionaryService dictionaryService;
 @inject IJSRuntime JS;
 
 <MudStack Row="true">
@@ -213,12 +214,7 @@
         {
             try
             {
-                var uri = $"https://api.dictionaryapi.dev/api/v2/entries/en/{TextToSpeak}";
-                var request = new HttpRequestMessage(HttpMethod.Get, uri);
-
-                var response = await Http.SendAsync(request);
-                var value = await response.Content.ReadAsStringAsync();
-                dictionaryResponse = await response.Content.ReadFromJsonAsync<List<DictionaryResponse>>();
+               dictionaryResponse = await dictionaryService.GetMoreAboutTheWord(TextToSpeak);
             }
             catch (Exception ex)
             {
