@@ -59,10 +59,10 @@
     {
         var words = await Http.GetFromJsonAsync<IEnumerable<string>>("words.json");
 
-
         if (words != null && words.Any())
         {
-            dictationModel = words.Select((q, i) => new DictationModel { Word = q, Index = i }).ToList();
+            var rand = new Random();
+            dictationModel = words.OrderBy(r=>rand.Next()).Select((q, i) => new DictationModel { Word = q, Index = i }).ToList();
         }
     }
 
