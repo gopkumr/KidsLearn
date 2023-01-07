@@ -28,7 +28,7 @@
                 <MudButton Size="Size.Large" Class="p-3" EndIcon="@Icons.Material.Filled.Speed">Speed<MudChip Variant="Variant.Outlined" Size="Size.Small">@speed</MudChip></MudButton>
             </ActivatorContent>
             <ChildContent>
-                <MudMenuItem @onclick="()=>SelectSpeed(0.5)">
+                <MudMenuItem @onclick="()=>SelectSpeed(0.5)" @ontouchend="()=>SelectSpeed(0.5)">
                     @if (speed == 0.5)
                     {
                         <MudIcon Icon="@Icons.Material.Filled.Check" Title="Tick" />
