@@ -1,0 +1,24 @@
+﻿
+<MudImage Fluid="true" @bind-src="@ImageUrl" Alt="Hangman" Width="200" Height="250" Class="rounded-lg" />
+@code {
+    string ImageUrl = "img/hangman/0.png";
+    int failedCount = 0;
+
+    [Parameter]
+    public int FailedCount
+    {
+        get
+        {
+            return failedCount;
+        }
+        set
+        {
+            if (value < 8)
+            {
+                failedCount++;
+                ImageUrl = $"img/hangman/{failedCount}.png";
+            }
+        }
+    }
+
+}

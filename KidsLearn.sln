@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KidsLearn.Client", "KidsLea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KidsLearn.Shared", "KidsLearn\Shared\KidsLearn.Shared.csproj", "{736691C0-67C4-405B-B70E-C84B08DCB6BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KidsLearn.UnitTests", "KidsLearn.UnitTests\KidsLearn.UnitTests.csproj", "{9FC2F0DF-54A5-4609-92BF-67C8FEF39EFC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KidsLearn.UnitTests", "KidsLearn.UnitTests\KidsLearn.UnitTests.csproj", "{9FC2F0DF-54A5-4609-92BF-67C8FEF39EFC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

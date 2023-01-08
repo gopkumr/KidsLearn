@@ -1,0 +1,70 @@
+﻿@using KidsLearn.Shared.models;
+
+@inject HttpClient Http;
+@inject IDialogService Dialog;
+
+@page "/hangman"
+
+
+<MudText Typo="Typo.h3" Class="ml-4">Hangman</MudText>
+
+<MudGrid Spacing="2" Justify="Justify.Center">
+    <MudItem xs="4">
+        <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
+            <Man FailedCount="@failedChoice" />
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="8">
+        <MudGrid>
+            <MudItem xs="12">
+                <Word WordToRender="@wordToRender" TypedCharacter="@characterTyped" TypedSoFar="@wordTypedSoFar" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudGrid Justify="Justify.FlexStart" Spacing="1">
+                    @for (int i = 0; i < letters.Count; i++)
+                    {
+                        int localIndex = i;
+                        var disabledClass = "mud-theme-primary";
+                        var additionalClass = "d-flex align-center justify-center mud-width-full py-8 ";
+                        if (wordTypedSoFar.Contains(@letters[localIndex]))
+                        {
+                            additionalClass = additionalClass + disabledClass;
+                        }
+                        <MudItem xs="2">
+                            <MudPaper Elevation="25" Class="@additionalClass" Outlined="true" Square="true" Style="cursor: pointer;" @onclick="()=>CharacterChosen(letters[localIndex])">
+                                <MudText Typo="Typo.h4">@letters[localIndex].ToString()</MudText>
+                            </MudPaper>
+                        </MudItem>
+                    }
+                </MudGrid>
+            </MudItem>
+        </MudGrid>
+    </MudItem>
+</MudGrid>
+
+@code {
+
+    [Inject] private IDialogService DialogService { get; set; }
+
+    int failedChoice = 0;
+    char characterTyped;
+    string wordTypedSoFar="";
+    List<char> letters = new() { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+    string wordToRender = "ANTARTICA";
+
+    protected void CharacterChosen(char character)
+    {
+        characterTyped = character;
+        wordTypedSoFar = wordTypedSoFar + character;
+        if (!wordToRender.Contains(character))
+        {
+            failedChoice++;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var words = await Http.GetFromJsonAsync<IEnumerable<string>>("words.json");
+
+    }
+}
