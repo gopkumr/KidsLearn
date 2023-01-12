@@ -2,6 +2,7 @@
 @using System.Text;
 @using KidsLearn.Shared.models;
 
+@inject NavigationManager NavManager
 @inject IJSRuntime JS
 
 <MudDialog DisableSidePadding="true">
@@ -41,6 +42,7 @@
 
         await DownloadFileFromStream();
         MudDialog.Close(DialogResult.Ok(true));
+        NavManager.NavigateTo("/");
     }
 
     private Stream GetResultStream()
