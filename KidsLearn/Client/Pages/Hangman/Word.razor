@@ -1,42 +1,53 @@
 ﻿<MudStack Row="true">
-    @foreach (char ch in WordToRender)
+    @if (string.IsNullOrEmpty(WordToRender))
     {
-        <MudPaper Class="pa-3">
-            @if (TypedSoFar.Contains(ch))
-            {
-                <MudText Typo="Typo.h4">@ch.ToString()</MudText>
-            }
-            else
-            {
-                <MudIcon Icon="@Icons.Material.Filled.HorizontalRule" Title="Dash" />
-            }
-        </MudPaper>
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+    }
+    else
+    {
+        foreach (char ch in WordToRender)
+        {
+            <MudPaper Class="pa-3">
+                @if (TypedSoFar.Contains(ch))
+                {
+                    <MudText Typo="Typo.h4">@ch.ToString()</MudText>
+                }
+                else
+                {
+                    <MudIcon Icon="@Icons.Material.Filled.HorizontalRule" Title="Dash" />
+                }
+            </MudPaper>
+        }
     }
 </MudStack>
 
 @code {
+    string typedSoFar = string.Empty;
+
     [Parameter]
     public string WordToRender { get; set; } = "";
 
     [Parameter]
-    public char TypedCharacter
+    public string TypedSoFar
     {
+        get
+        {
+            return typedSoFar;
+        }
         set
         {
-            TypedSoFar = TypedSoFar + value;
+            if (typedSoFar != value)
+            {
+                typedSoFar = value;
+                if (!string.IsNullOrEmpty(typedSoFar) && WordToRender.Except(TypedSoFar).Count() == 0)
+                {
+                    OnWordCompleted.InvokeAsync();
+                }
+            }
         }
     }
 
     [Parameter]
-    public string TypedSoFar
-    {
-        get; set;
-    } = "";
-
-    [Parameter]
-    public bool WordCompleted { get; set; } = false;
-
-    [Parameter]
-    public EventCallback<bool> WordCompletedChanged { get; set; }
+    public EventCallback OnWordCompleted { get; set; }
 
 }

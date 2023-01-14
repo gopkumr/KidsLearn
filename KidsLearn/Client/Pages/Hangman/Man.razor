@@ -1,11 +1,39 @@
 ﻿
 <MudImage Fluid="true" @bind-src="@ImageUrl" Alt="Hangman" Width="200" Height="250" Class="rounded-lg" />
+@if (!string.IsNullOrEmpty(Hint_Type))
+{
+    <MudAlert Variant="Variant.Outlined" Severity="Severity.Info">Type: @Hint_Type</MudAlert>
+}
 @code {
     string ImageUrl = "img/hangman/0.png";
     int failedCount = 0;
+    int hangmanChances = 8;
+    char characterChosen;
+    bool manHanged = false;
 
     [Parameter]
-    public int FailedCount
+    public EventCallback OnManHanged { get; set; }
+
+    [Parameter]
+    public string WordToRender { get; set; }= "";
+
+    [Parameter]
+    public string Hint_Type { get; set; } = "";
+
+    [Parameter]
+    public char CharacterChosen
+    {
+        get { return characterChosen; }
+        set
+        {
+            if (!(value == default(char)) && !string.IsNullOrEmpty(WordToRender) && !WordToRender.Contains(value))
+            {
+                FailedCount++;
+            }
+        }
+    }
+
+    int FailedCount
     {
         get
         {
@@ -13,12 +41,21 @@
         }
         set
         {
-            if (value < 8)
+            if (!manHanged)
             {
-                failedCount++;
-                ImageUrl = $"img/hangman/{failedCount}.png";
+                if (value <= hangmanChances)
+                {
+                    failedCount = value;
+                    ImageUrl = $"img/hangman/{failedCount}.png";
+                    if (value == hangmanChances)
+                    {
+
+                        OnManHanged.InvokeAsync();
+                        manHanged = true;
+                    }
+                }
             }
         }
     }
 
-}
+        }

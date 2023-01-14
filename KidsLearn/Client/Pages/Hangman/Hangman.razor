@@ -1,23 +1,24 @@
 ﻿@using KidsLearn.Shared.models;
+@using KidsLearn.Shared.services;
 
-@inject HttpClient Http;
-@inject IDialogService Dialog;
+@inject ICountryService countryService;
+@inject IDialogService DialogService;
+@inject NavigationManager NavManager;
 
 @page "/hangman"
-
 
 <MudText Typo="Typo.h3" Class="ml-4">Hangman</MudText>
 
 <MudGrid Spacing="2" Justify="Justify.Center">
     <MudItem xs="4">
         <MudPaper Class="d-flex flex-column align-center justify-center mud-width-full py-8">
-            <Man FailedCount="@failedChoice" />
+            <Man WordToRender="@wordToRender" CharacterChosen="@characterChosen" Hint_Type="@hint_type" OnManHanged="FailedWord" />
         </MudPaper>
     </MudItem>
     <MudItem xs="8">
         <MudGrid>
             <MudItem xs="12">
-                <Word WordToRender="@wordToRender" TypedCharacter="@characterTyped" TypedSoFar="@wordTypedSoFar" />
+                <Word WordToRender="@wordToRender" TypedSoFar="@wordTypedSoFar" OnWordCompleted="CompletedWord" />
             </MudItem>
             <MudItem xs="12">
                 <MudGrid Justify="Justify.FlexStart" Spacing="1">
@@ -44,27 +45,39 @@
 
 @code {
 
-    [Inject] private IDialogService DialogService { get; set; }
-
-    int failedChoice = 0;
-    char characterTyped;
     string wordTypedSoFar="";
+    char characterChosen=default(char);
     List<char> letters = new() { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
-    string wordToRender = "ANTARTICA";
+    string wordToRender = "";
+    string hint_type = string.Empty;
 
     protected void CharacterChosen(char character)
     {
-        characterTyped = character;
-        wordTypedSoFar = wordTypedSoFar + character;
-        if (!wordToRender.Contains(character))
+        if (!wordTypedSoFar.Contains(character))
         {
-            failedChoice++;
+            wordTypedSoFar = $"{wordTypedSoFar}{character}";
+            characterChosen = character;
         }
     }
 
     protected override async Task OnInitializedAsync()
     {
-        var words = await Http.GetFromJsonAsync<IEnumerable<string>>("words.json");
+        var countries = await countryService.GetCountries();
+        var randomCountry = countries.OrderBy(q => Random.Shared.Next()).First();
+        wordToRender = randomCountry.name.ToUpper();
+        hint_type = "Country";
+        StateHasChanged();
+    }
 
+    protected async Task FailedWord()
+    {
+        await DialogService.ShowMessageBox("Finished", "You Failed to complete");
+        NavManager.NavigateTo("/");
+    }
+
+    protected async Task CompletedWord()
+    {
+        await  DialogService.ShowMessageBox("Finished", "You were sucessfull to complete");
+        NavManager.NavigateTo("/");
     }
 }
