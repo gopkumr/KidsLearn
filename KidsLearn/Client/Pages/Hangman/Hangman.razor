@@ -18,7 +18,7 @@
     <MudItem xs="8">
         <MudGrid>
             <MudItem xs="12">
-                <Word WordToRender="@wordToRender" TypedSoFar="@wordTypedSoFar" OnWordCompleted="CompletedWord" />
+                <Word WordToRender="@wordToRender" TypedSoFar="@wordTypedSoFar" OnWordCompleted="CompletedWord"  Reveal="@revealWord"/>
             </MudItem>
             <MudItem xs="12">
                 <MudGrid Justify="Justify.FlexStart" Spacing="1">
@@ -50,6 +50,7 @@
     List<char> letters = new() { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
     string wordToRender = "";
     string hint_type = string.Empty;
+    bool revealWord = false;
 
     protected void CharacterChosen(char character)
     {
@@ -71,13 +72,14 @@
 
     protected async Task FailedWord()
     {
-        await DialogService.ShowMessageBox("Finished", "You Failed to complete");
+        revealWord = true;
+        await DialogService.ShowMessageBox("Failed", "You Failed to complete");
         NavManager.NavigateTo("/");
     }
 
     protected async Task CompletedWord()
     {
-        await  DialogService.ShowMessageBox("Finished", "You were sucessfull to complete");
+        await DialogService.ShowMessageBox("Success", "You successfully completed the word");
         NavManager.NavigateTo("/");
     }
 }

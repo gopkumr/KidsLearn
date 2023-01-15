@@ -1,4 +1,5 @@
-﻿<MudStack Row="true">
+﻿@using System.Text.RegularExpressions;
+<MudStack Row="true">
     @if (string.IsNullOrEmpty(WordToRender))
     {
         <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
@@ -7,10 +8,16 @@
     {
         foreach (char ch in WordToRender)
         {
+            var charcter = ch.ToString();
+            if (Regex.IsMatch(ch.ToString(), "[^A-Z]"))
+            {
+                charcter = " ";
+            }
+
             <MudPaper Class="pa-3">
-                @if (TypedSoFar.Contains(ch))
+                @if (TypedSoFar.Contains(ch) || Reveal || charcter.Equals(" "))
                 {
-                    <MudText Typo="Typo.h4">@ch.ToString()</MudText>
+                    <MudText Typo="Typo.h4">@charcter</MudText>
                 }
                 else
                 {
@@ -39,7 +46,7 @@
             if (typedSoFar != value)
             {
                 typedSoFar = value;
-                if (!string.IsNullOrEmpty(typedSoFar) && WordToRender.Except(TypedSoFar).Count() == 0)
+                if (!string.IsNullOrEmpty(typedSoFar) && Regex.Replace(WordToRender, "[^A-Z]", "").Except(TypedSoFar).Count() == 0)
                 {
                     OnWordCompleted.InvokeAsync();
                 }
@@ -49,5 +56,8 @@
 
     [Parameter]
     public EventCallback OnWordCompleted { get; set; }
+
+    [Parameter]
+    public bool Reveal { get; set; }
 
 }
